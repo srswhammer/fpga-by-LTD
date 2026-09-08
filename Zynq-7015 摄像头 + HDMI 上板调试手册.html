@@ -1,0 +1,709 @@
+<title>Zynq-7015 上板调试手册</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f5f4;
+    --surface:#ffffff;
+    --surface-2:#e9edec;
+    --surface-3:#dde3e1;
+    --border:#d2d9d7;
+    --text:#16201d;
+    --muted:#57635f;
+    --faint:#8b9793;
+    --accent:#0d8f6b;
+    --accent-ink:#ffffff;
+    --accent-weak:#e1f3ec;
+    --warn:#a8590c;
+    --warn-weak:#fbecd9;
+    --danger:#b8331f;
+    --danger-weak:#fbe6e2;
+    --shadow: 0 1px 2px rgba(20,30,27,0.04), 0 8px 24px -12px rgba(20,30,27,0.12);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0b1211;
+      --surface:#121b19;
+      --surface-2:#182420;
+      --surface-3:#203028;
+      --border:#28352f;
+      --text:#e7efec;
+      --muted:#9fb0aa;
+      --faint:#657a72;
+      --accent:#3ddba0;
+      --accent-ink:#04211a;
+      --accent-weak:#183129;
+      --warn:#f0a94e;
+      --warn-weak:#2c2213;
+      --danger:#f38a76;
+      --danger-weak:#2c1815;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b1211;
+    --surface:#121b19;
+    --surface-2:#182420;
+    --surface-3:#203028;
+    --border:#28352f;
+    --text:#e7efec;
+    --muted:#9fb0aa;
+    --faint:#657a72;
+    --accent:#3ddba0;
+    --accent-ink:#04211a;
+    --accent-weak:#183129;
+    --warn:#f0a94e;
+    --warn-weak:#2c2213;
+    --danger:#f38a76;
+    --danger-weak:#2c1815;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"IBM Plex Sans","IBM Plex Sans SC",-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.6;
+  }
+  code, .mono, .reg, .pin{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  h1,h2,h3{ text-wrap:balance; }
+  a{ color:var(--accent); }
+
+  /* ---------- shell layout ---------- */
+  .shell{
+    max-width:1180px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+    display:grid;
+    grid-template-columns:232px minmax(0,1fr);
+    gap:32px;
+  }
+  @media (max-width:880px){
+    .shell{ grid-template-columns:1fr; padding:16px 14px 60px; }
+  }
+
+  /* ---------- header ---------- */
+  .masthead{
+    grid-column:1/-1;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    margin-bottom:6px;
+  }
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+  }
+  .masthead h1{
+    font-size:clamp(24px,3.4vw,32px);
+    margin:2px 0 0;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .masthead .sub{
+    color:var(--muted);
+    font-size:14.5px;
+    max-width:70ch;
+  }
+  .manifest{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:4px;
+  }
+  .chip{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:7px 12px;
+    font-size:13px;
+    box-shadow:var(--shadow);
+  }
+  .chip .k{ color:var(--faint); font-family:"IBM Plex Mono",monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.06em;}
+  .chip .v{ font-weight:600; }
+
+  .progress-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:6px;
+  }
+  .progress-bar{
+    flex:1;
+    height:8px;
+    border-radius:99px;
+    background:var(--surface-3);
+    overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--accent),var(--accent));
+    width:0%;
+    transition:width .35s ease;
+    border-radius:99px;
+  }
+  .progress-label{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12.5px;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+
+  /* ---------- side rail ---------- */
+  .rail{
+    align-self:start;
+    position:sticky;
+    top:20px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  @media (max-width:880px){
+    .rail{
+      position:static;
+      flex-direction:row;
+      overflow-x:auto;
+      gap:8px;
+      padding-bottom:8px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .rail::-webkit-scrollbar{ height:0; }
+  }
+  .rail-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border-radius:8px;
+    text-decoration:none;
+    color:var(--muted);
+    font-size:13.5px;
+    border:1px solid transparent;
+    white-space:nowrap;
+    cursor:pointer;
+    background:transparent;
+    text-align:left;
+    font-family:inherit;
+  }
+  .rail-item:hover{ background:var(--surface-2); color:var(--text); }
+  .rail-item.active{ background:var(--surface); border-color:var(--border); color:var(--text); box-shadow:var(--shadow); }
+  .rail-dot{
+    width:9px; height:9px; border-radius:50%;
+    background:var(--surface-3);
+    border:1.5px solid var(--faint);
+    flex-shrink:0;
+  }
+  .rail-dot.done{ background:var(--accent); border-color:var(--accent); }
+  .rail-dot.doing{ background:var(--warn-weak); border-color:var(--warn); }
+  .rail-num{ font-family:"IBM Plex Mono",monospace; color:var(--faint); font-size:11.5px; width:16px; }
+
+  /* ---------- main column ---------- */
+  main{ display:flex; flex-direction:column; gap:22px; min-width:0; }
+
+  .stage{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:22px 24px 24px;
+    scroll-margin-top:20px;
+  }
+  .stage-head{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .stage-badge{
+    font-family:"IBM Plex Mono",monospace;
+    font-weight:700;
+    font-size:13px;
+    color:var(--accent-ink);
+    background:var(--accent);
+    border-radius:8px;
+    width:34px;height:34px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .stage-badge.ref{ background:var(--surface-3); color:var(--muted); }
+  .stage-title h2{
+    font-size:18px;
+    margin:0 0 3px;
+    font-weight:700;
+  }
+  .stage-goal{
+    color:var(--muted);
+    font-size:13.8px;
+  }
+
+  .step{
+    display:flex;
+    gap:11px;
+    padding:10px 0;
+    border-top:1px solid var(--border);
+  }
+  .step:first-of-type{ border-top:none; padding-top:2px; }
+  .step input[type="checkbox"]{
+    margin-top:3px;
+    width:16px;height:16px;
+    accent-color:var(--accent);
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .step label{ cursor:pointer; flex:1; }
+  .step .step-text{ font-size:14.3px; }
+  .step .step-detail{
+    margin-top:5px;
+    font-size:13.2px;
+    color:var(--muted);
+    line-height:1.55;
+  }
+  .step.done .step-text{ color:var(--faint); text-decoration:line-through; text-decoration-color:var(--border); }
+
+  .callout{
+    display:flex;
+    gap:10px;
+    border-radius:10px;
+    padding:11px 13px;
+    margin:14px 0 4px;
+    font-size:13.4px;
+    line-height:1.55;
+  }
+  .callout.check{ background:var(--accent-weak); border:1px solid color-mix(in srgb, var(--accent) 35%, var(--border)); }
+  .callout.warn{ background:var(--warn-weak); border:1px solid color-mix(in srgb, var(--warn) 35%, var(--border)); }
+  .callout .ctag{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:700;
+    flex-shrink:0;
+    padding-top:2px;
+  }
+  .callout.check .ctag{ color:var(--accent); }
+  .callout.warn .ctag{ color:var(--warn); }
+
+  .reg{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:1px 6px;
+    font-size:12.6px;
+    white-space:nowrap;
+  }
+
+  /* troubleshooting table */
+  .tbl-wrap{ overflow-x:auto; border:1px solid var(--border); border-radius:10px; }
+  table{ border-collapse:collapse; width:100%; min-width:640px; font-size:13.3px; }
+  thead th{
+    text-align:left;
+    background:var(--surface-2);
+    color:var(--muted);
+    font-family:"IBM Plex Mono",monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:9px 12px;
+    border-bottom:1px solid var(--border);
+  }
+  tbody td{
+    padding:10px 12px;
+    border-bottom:1px solid var(--border);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  .sev{
+    display:inline-block;
+    font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:99px;
+    white-space:nowrap;
+  }
+  .sev.high{ background:var(--danger-weak); color:var(--danger); }
+  .sev.mid{ background:var(--warn-weak); color:var(--warn); }
+
+  details.pitfall{
+    margin-top:10px;
+    border:1px dashed var(--border);
+    border-radius:9px;
+    padding:2px 12px;
+  }
+  details.pitfall summary{
+    cursor:pointer;
+    padding:9px 0;
+    font-size:13.4px;
+    font-weight:600;
+    color:var(--muted);
+    list-style:none;
+  }
+  details.pitfall summary::-webkit-details-marker{ display:none; }
+  details.pitfall summary::before{
+    content:"▸ ";
+    color:var(--accent);
+  }
+  details.pitfall[open] summary::before{ content:"▾ "; }
+  details.pitfall .pf-body{ padding:0 0 12px 14px; font-size:13.2px; color:var(--muted); line-height:1.6; }
+  details.pitfall .pf-body ul{ margin:6px 0; padding-left:18px; }
+  details.pitfall .pf-body li{ margin:3px 0; }
+
+  footer{
+    grid-column:1/-1;
+    margin-top:10px;
+    padding-top:18px;
+    border-top:1px solid var(--border);
+    color:var(--faint);
+    font-size:12.6px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+</style>
+
+<div class="shell">
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">硬件 Bring-up Runbook</div>
+      <h1>Zynq-7015 摄像头 + HDMI 上板调试手册</h1>
+      <div class="sub">已核对原理图 / IO表：正点原子 ZYNQ7015 开发板（XC7Z015-CLG485-2I）。摄像头接口是<b>并口 DVP</b>（cam_data[7:0] + SCCB，兼容 OV5640/OV7725），不是 MIPI；HDMI OUT 是 <b>FPGA 原生差分直出</b>（clk/data_hdmi_out_p/n，无独立编码芯片）。以下步骤已按这块板子的真实网表调整。</div>
+    </div>
+    <div class="manifest">
+      <div class="chip"><span class="k">Board</span><span class="v">正点原子 ZYNQ7015 · XC7Z015-CLG485-2I</span></div>
+      <div class="chip"><span class="k">Camera</span><span class="v mono">cam_data[7:0] DVP · OV5640/OV7725</span></div>
+      <div class="chip"><span class="k">Display</span><span class="v mono">clk/data_hdmi_out_p/n 原生TMDS</span></div>
+      <div class="chip"><span class="k">Tool</span><span class="v">Vivado / Vitis</span></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">0 / 0 已完成</div>
+    </div>
+  </div>
+
+  <nav class="rail" id="rail"></nav>
+
+  <main id="main">
+
+    <section class="stage" data-stage="0">
+      <div class="stage-head">
+        <div class="stage-badge">0</div>
+        <div class="stage-title">
+          <h2>准备工作与资料确认</h2>
+          <div class="stage-goal">先把"图纸"备齐，再动手——国产板卡的坑一半来自版本对不上、原理图查错脚位。</div>
+        </div>
+      </div>
+
+      <div class="step"><input type="checkbox" id="s0-1"><label for="s0-1"><div class="step-text">找齐厂商配套资料：原理图（已拿到 <span class="reg">ZYNQ7015_BASE_1V1</span> / <span class="reg">ZYNQ7015_CORE_1V1</span>）、IO 引脚表、接口功能说明、官方"摄像头+HDMI显示"参考工程</div>
+        <div class="step-detail">底板原理图框图里明确写了 <span class="reg">CAMERA OV5640摄像头接口</span> + <span class="reg">HDMI OUT</span>，说明厂商大概率自带一个"摄像头预览显示"的现成例程，优先找这个工程作为起点，不要自己从 Block Design 空工程搭。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s0-2"><label for="s0-2"><div class="step-text">核对 Vivado / Vitis 版本：厂商官方工程版本 vs 赛事要求版本（2025.2 / 2026.1）</div>
+        <div class="step-detail">XC7Z015-CLG485-2I 属于 Zynq-7000（非 UltraScale+），正点原子这类板卡的官方例程常见停留在 2018.3～2019.1，且 HDMI OUT 的 TMDS 编码逻辑多是厂商手写的 Verilog IP（非 Vivado 目录 IP），跨大版本升级工程时优先检查这部分源码有没有被正确迁移，而不是只看综合能不能过。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s0-3"><label for="s0-3"><div class="step-text">下载器确认：JTAG 是板上 2×5 排针（<span class="reg">J18</span>），<b>没有板载 USB-JTAG</b>，必须另配一根 USB 转 JTAG 下载线（仿真器）</div>
+        <div class="step-detail">别默认"接根 USB 线 Vivado 就能认到板子"——这块板子的 JTAG 是独立排针，需要专门的下载器/仿真器线缆，先确认下载器驱动装好、线缆方向插对（排针有缺口/丝印标 1 脚）。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s0-4"><label for="s0-4"><div class="step-text">驱动准备：CH340 USB 转串口驱动（板上有两颗独立 CH340，分别对应 PS 串口和 PL 串口，装一次驱动即可）</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s0-5"><label for="s0-5"><div class="step-text">外设清点：摄像头模组（OV5640 或 OV7725，插 <span class="reg">OLED&amp;CAMERA</span> 排针，注意别插成 OLED 模块）、HDMI 显示器 + 短而优质的 HDMI 线、12V 电源适配器</div>
+        <div class="step-detail">HDMI OUT 是 FPGA 原生差分直出，信号摆幅比专用编码芯片低，线材质量、长度对能否点亮更敏感——调试阶段优先用 &lt;1.5m 的线，不要用延长线/切换器。</div></label></div>
+
+      <div class="callout warn"><div class="ctag">Note</div><div>拆开新板卡先目检：核心板与底板之间的两组 <span class="reg">FX10A-144pin</span> 板对板连接器是否完全压接到位（这是核心板与底板唯一的连接方式，没插稳会出现"时通时不通"的诡异现象），摄像头/OLED 排针有无歪针。</div></div>
+    </section>
+
+    <section class="stage" data-stage="1">
+      <div class="stage-head">
+        <div class="stage-badge">1</div>
+        <div class="stage-title">
+          <h2>裸板上电与基础状态确认</h2>
+          <div class="stage-goal">先不接摄像头子板、不接显示器，只验证主板本身能正常启动。原则：一次只引入一个变量。</div>
+        </div>
+      </div>
+
+      <div class="step"><input type="checkbox" id="s1-1"><label for="s1-1"><div class="step-text">拨码 <span class="reg">J15</span> 设为 JTAG 启动模式，上电前先量供电轨</div>
+        <div class="step-detail">这块板的供电链路是 12V→5V→(3.3V/1.8V/2.5V/1.2V)（底板）+ 核心板内部再生 1V(VCCINT/VCCPINT/VCCBRAM) 与 VCCAUX(1.8V) 链。上电后用万用表确认底板输出：<span class="reg">5V/8A</span>、<span class="reg">3.3V/3A</span>、<span class="reg">1.8V/3A</span>、<span class="reg">2.5V/1A</span>（BANK 2.5V，供 HR Bank34/35 用）、<span class="reg">1.2V/1A</span>。任何一路偏差超过 5% 先别往下走。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s1-2"><label for="s1-2"><div class="step-text">JTAG 下载线接 <span class="reg">J18</span>，Vivado Hardware Manager Auto Connect，确认识别为 <span class="reg">xc7z015clg485</span></div>
+        <div class="step-detail">识别不到时先查下载线方向和排针接触，再查 VCCAUX/VCCPAUX 是否到位（这两路来自核心板内部的 TPS74801 链，底板电压正常不代表核心板内部一定正常）。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s1-3"><label for="s1-3"><div class="step-text">跑通厂商最简单的 PL 侧 demo（如 PL_LED 流水灯 .bit），确认可编程逻辑区域基本可用</div>
+        <div class="step-detail">板上 PL_LED×2、PL_KEY×2 是独立于 PS 的资源，配合 PS_LED×3、PS_KEY×2 一起看，能快速区分故障是在 PL 侧还是 PS 侧。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s1-4"><label for="s1-4"><div class="step-text">Vitis 建 Hello World 工程跑到 ARM（PS）上，<b>注意板上有两个独立 CH340 串口</b>，分清楚接哪个口</div>
+        <div class="step-detail">PS 调试串口和 PL 通用串口是两颗分开的 CH340（对应两个独立的 USB 口），装完驱动后电脑会出现两个 COM 口。PS 侧 Hello World 打印要接 <b>PS 串口</b>那个口，接错口会看起来像"程序没跑起来"。</div></label></div>
+
+      <div class="callout check"><div class="ctag">通过标准</div><div>Hardware Manager 能稳定识别器件 + LED demo 能下载运行 + PS 串口能打印 Hello World，三者都成立，才进入下一阶段。</div></div>
+
+      <details class="pitfall">
+        <summary>参考：J15 启动模式跳线表</summary>
+        <div class="pf-body">
+          按 MIO4/MIO5 两位跳线组合（ON = 短接）：<br>
+          <span class="reg">JTAG</span>：MIO4 ON，MIO5 ON　|　<span class="reg">NAND</span>：MIO4 OFF，MIO5 ON<br>
+          <span class="reg">QSPI</span>：MIO4 ON，MIO5 OFF　|　<span class="reg">SD Card</span>：MIO4 OFF，MIO5 OFF
+        </div>
+      </details>
+    </section>
+
+    <section class="stage" data-stage="2">
+      <div class="stage-head">
+        <div class="stage-badge">2</div>
+        <div class="stage-title">
+          <h2>通信通道验证</h2>
+          <div class="stage-goal">打通后续调试要依赖的通道：串口打日志、SD 卡独立启动、网口（如果要远程传图）。</div>
+        </div>
+      </div>
+
+      <div class="step"><input type="checkbox" id="s2-1"><label for="s2-1"><div class="step-text">确认串口波特率（通常 115200-8-N-1），能稳定打印 boot log / printf 调试信息</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s2-2"><label for="s2-2"><div class="step-text">JTAG 模式验证通过的 .bit / .elf，制作 SD 卡启动（BOOT.bin + image.ub 或裸机 elf），验证脱机独立运行</div>
+        <div class="step-detail">先在 JTAG 模式把功能调通，再切 SD 卡固化，出问题时能立刻区分是"设计问题"还是"启动流程问题"。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s2-3"><label for="s2-3"><div class="step-text">（如需要）网口 ping 通，为后续用网络导出图像帧/远程调试做准备</div></label></div>
+    </section>
+
+    <section class="stage" data-stage="3">
+      <div class="stage-head">
+        <div class="stage-badge">3</div>
+        <div class="stage-title">
+          <h2>摄像头单独验证（并口 DVP）</h2>
+          <div class="stage-goal">这块板的摄像头接口是<b>并口</b>：cam_data[7:0] + cam_pclk/href/vsync + cam_scl/sda(SCCB)，没有 MIPI D-PHY，不需要调 Lane。先不接 HDMI，只验证「传感器能被识别 + 图像数据能进 DDR」。</div>
+        </div>
+      </div>
+
+      <div class="step"><input type="checkbox" id="s3-1"><label for="s3-1"><div class="step-text">物理连接检查：摄像头模组插在 <span class="reg">OLED&amp;CAMERA</span> 排针上，缺口/丝印第 1 脚对齐，不要误插成 OLED 模块（两者共用同一排排针，模块不兼容）</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s3-2"><label for="s3-2"><div class="step-text">先只做 SCCB(I2C) 读 ID 测试，不跑并口采集逻辑</div>
+        <div class="step-detail">cam_scl/cam_sda 是独立总线（不与 EEPROM/RTC/触摸屏共用），用最简单的 IIC 读写程序读取 Chip ID：<br>
+        OV5640：7bit 地址 <span class="reg">0x3C</span>（8bit <span class="reg">0x78/0x79</span>），寄存器 <span class="reg">0x300A/0x300B</span> 应读出 <span class="reg">0x56 0x40</span>。<br>
+        OV7725：7bit 地址 <span class="reg">0x21</span>（8bit <span class="reg">0x42/0x43</span>），寄存器 <span class="reg">0x0A/0x0B</span> 应读出 <span class="reg">0x77 0x21</span>。<br>
+        读不到 ID，问题 90% 出在下面这一条（时钟没给对），不要往下走。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s3-3"><label for="s3-3"><div class="step-text">确认 <span class="reg">cam_xclk</span> 有没有正常输出到摄像头，<span class="reg">cam_rst_n</span> 复位时序是否满足</div>
+        <div class="step-detail">cam_xclk 是 FPGA 送给传感器的参考时钟（OV5640 常用 24MHz），传感器内部 PLL 要靠它才能起振，起振前 SCCB 完全没有响应——这是"读不到 ID"最常见的原因，先用示波器确认这根线有波形。<span class="reg">cam_sgm_ctrl/cam_pwdn</span> 引脚在用 OV7725 时是时钟来源选择（0=用 cam_xclk，1=用摄像头自带晶振），模组类型不同、含义不同，接线前对照自己模组的说明书确认。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s3-4"><label for="s3-4"><div class="step-text">加载厂商并口摄像头采集参考 bit 流，用 ILA 抓 <span class="reg">cam_href</span> / <span class="reg">cam_vsync</span> / <span class="reg">cam_pclk</span>，确认行同步/场同步按配置的分辨率帧率正常翻转</div>
+        <div class="step-detail">并口时序比 MIPI 简单得多，不涉及 Lane 锁定；重点看 href 在一行有效数据期间是否持续拉高、vsync 每帧翻转一次的周期是否等于 1/帧率。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s3-5"><label for="s3-5"><div class="step-text">把 cam_data[7:0] 通过 VDMA 写入 DDR，导出一帧数据核对格式</div>
+        <div class="step-detail">OV5640 并口模式通常由传感器自带 ISP 直接输出 YUV422 或 RGB565（不是裸 Bayer 数据），FPGA 这一侧不需要再做 Demosaic——比 MIPI RAW 数据链路简单，导出后按 YUYV/RGB565 直接解码看能不能出图即可。</div></label></div>
+
+      <div class="callout check"><div class="ctag">通过标准</div><div>能稳定读到 Sensor Chip ID，且 VDMA 写出的一帧数据在导出后能正确解出图像内容（哪怕颜色不对、只要轮廓对得上），才算这一阶段通过。</div></div>
+
+      <details class="pitfall">
+        <summary>展开：摄像头阶段常见坑</summary>
+        <div class="pf-body">
+          <ul>
+            <li>cam_xclk 没输出或频率不对：传感器 PLL 起不来，SCCB 完全无响应，这是第一排查点。</li>
+            <li>cam_rst_n / PWDN 时序不满足：复位保持时间不够、或 PWDN 极性接反导致传感器一直处于掉电状态。</li>
+            <li>误插 OLED 模块到摄像头排针（或反之）：两者共用同一物理接口，模组丝印容易混淆。</li>
+            <li>href/vsync 有翻转但图像扭曲：多半是传感器寄存器里的输出格式（YUV422/RGB565/RAW）配置和 FPGA 这边的解析格式没对上，先确认两边格式一致。</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section class="stage" data-stage="4">
+      <div class="stage-head">
+        <div class="stage-badge">4</div>
+        <div class="stage-title">
+          <h2>HDMI 显示单独验证（FPGA 原生直出）</h2>
+          <div class="stage-goal">这块板的 HDMI OUT 没有 ADV7511 之类的独立编码芯片——差分对 <span class="reg">clk_hdmi_out_p/n</span> + <span class="reg">data_hdmi_out_p/n[2:0]</span> 直接从 FPGA Bank 引出，TMDS 编码是厂商写在 fabric 里的逻辑（多用 OSERDESE2 + <span class="reg">TMDS_33</span> 差分标准实现）。先不接摄像头，用内部彩条验证这条链路本身是否健康。</div>
+        </div>
+      </div>
+
+      <div class="step"><input type="checkbox" id="s4-1"><label for="s4-1"><div class="step-text">确认 HDMI 供电与 HPD：连接器附近有独立的 <span class="reg">3.3V_HDMI</span> LDO 和 <span class="reg">HDMIB_FHPD</span> 检测信号</div>
+        <div class="step-detail">插上显示器和线缆后，HPD（热插拔检测）经分压电阻送到一个 FPGA 输入引脚——上板前可以先用示波器/万用表确认插线后这个引脚电平会变化，不用等下载 bit 流就能验证物理连接是否通。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s4-2"><label for="s4-2"><div class="step-text">加载厂商彩条测试图案（TPG）demo，确认显示器能收到信号并显示稳定彩条</div>
+        <div class="step-detail">这类原生 TMDS 方案通常<b>不读显示器 EDID</b>，时序是代码里写死的固定值（常见 800×600@60 / 1280×720@60），核对官方例程里配置的分辨率和你的显示器是否支持这个"标准"时序，不支持就换一台显示器，而不是猜厂商没做兼容。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s4-3"><label for="s4-3"><div class="step-text">若无信号：先看 HPD 引脚是否为高（判断显示器有没有被正确检测到），再看像素时钟 PLL/MMCM 是否 Locked</div>
+        <div class="step-detail">因为没有 EDID/DDC 交互，"无信号"基本只有两种可能：HPD 没检测到（连接问题）或时钟没锁定（PLL 配置问题），不用往"芯片没初始化"这个方向排查。</div></label></div>
+
+      <div class="callout warn"><div class="ctag">Note</div><div>原生 TMDS 直出对线材更敏感：调试阶段用短而优质的 HDMI 线（&lt;1.5m），不要接转接头/延长线/切换器，出现"时有时无""偶尔花屏"优先怀疑线材和接触，而不是逻辑设计。</div></div>
+
+      <div class="callout check"><div class="ctag">通过标准</div><div>彩条图案在显示器上稳定显示、无花屏/无滚动/无黑屏，且分辨率与官方例程配置的时序一致。</div></div>
+    </section>
+
+    <section class="stage" data-stage="5">
+      <div class="stage-head">
+        <div class="stage-badge">5</div>
+        <div class="stage-title">
+          <h2>摄像头 + HDMI 联调</h2>
+          <div class="stage-goal">阶段 3、4 都独立通过后，再打通完整链路——这是唯一允许两个变量同时存在的阶段。</div>
+        </div>
+      </div>
+
+      <div class="step"><input type="checkbox" id="s5-1"><label for="s5-1"><div class="step-text">优先直接跑通厂商官方「摄像头预览显示」参考工程，作为联调起点</div>
+        <div class="step-detail">典型数据通路：Sensor(DVP, YUV422/RGB565) → 格式转换 → VDMA(写) → VDMA(读) → AXI4-Stream to Video Out → TMDS 编码 → HDMI OUT。因为传感器已经用自带 ISP 转好了 YUV/RGB，链路比 MIPI RAW 方案少一级 Demosaic，官方工程通常已经把这条链路搭好，直接跑通比自己从头拼 Block Design 效率高得多。</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s5-2"><label for="s5-2"><div class="step-text">核对摄像头输出分辨率/帧率与 HDMI 显示分辨率是否一致，不一致时确认链路中是否有 Scaler，参数是否正确配置</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s5-3"><label for="s5-3"><div class="step-text">在自己的工程里逐步替换官方例程模块（先只替换非核心部分），每替换一步都重新上板验证，避免一次改太多定位不到问题</div></label></div>
+
+      <div class="callout check"><div class="ctag">通过标准</div><div>显示器上能实时看到摄像头画面，遮挡镜头画面随之变化，长时间运行（建议 ≥10 分钟）无花屏/卡死/丢帧累积。</div></div>
+    </section>
+
+    <section class="stage" data-stage="6">
+      <div class="stage-head">
+        <div class="stage-badge ref">✓</div>
+        <div class="stage-title">
+          <h2>故障速查表</h2>
+          <div class="stage-goal">按现象反查可能原因，配合阶段 3/4 的「常见坑」一起看。</div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>现象</th><th>可能原因</th><th>排查动作</th><th>优先级</th></tr></thead>
+          <tbody>
+            <tr><td>SCCB 读不到 Sensor ID</td><td>cam_xclk 未输出/频率不对、cam_rst_n 时序不满足、误插 OLED 模块</td><td>示波器测 cam_xclk 是否有波形；核对复位保持时间；确认排针插的是摄像头模组不是 OLED</td><td><span class="sev high">高</span></td></tr>
+            <tr><td>能读到 ID，但 href/vsync 不翻转或图像全花</td><td>传感器初始化寄存器序列没配完整、cam_pclk 采样沿设置错误</td><td>ILA 抓 href/vsync/pclk 时序，核对 IIC 初始化寄存器表是否发送完整并有 ACK</td><td><span class="sev high">高</span></td></tr>
+            <tr><td>HDMI 完全无信号</td><td>HPD 未检测到显示器、像素时钟 PLL/MMCM 未 Locked</td><td>先读 HDMIB_FHPD 引脚电平，再确认 PLL/MMCM locked 状态位</td><td><span class="sev high">高</span></td></tr>
+            <tr><td>HDMI 有信号但花屏/滚动/偶尔黑屏</td><td>显示器不支持代码里写死的时序；线材/接触不良（原生 TMDS 摆幅偏低更敏感）</td><td>换一台显示器交叉验证；换短且优质的 HDMI 线重测</td><td><span class="sev mid">中</span></td></tr>
+            <tr><td>画面偏色/发绿发紫</td><td>传感器输出格式（YUV422/RGB565）与 FPGA 端解析格式不一致、字节序问题</td><td>核对 OV5640/OV7725 输出格式寄存器配置与 FPGA 端解析逻辑是否匹配</td><td><span class="sev mid">中</span></td></tr>
+            <tr><td>运行一段时间后画面卡死/花屏</td><td>VDMA 帧缓存溢出、AXI 总线拥塞、时钟域交叉问题</td><td>检查 VDMA 中断/错误状态位，评估带宽是否够（分辨率×帧率×字节数）</td><td><span class="sev mid">中</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="stage" data-stage="7">
+      <div class="stage-head">
+        <div class="stage-badge">7</div>
+        <div class="stage-title">
+          <h2>记录与交付</h2>
+          <div class="stage-goal">硬件跑通只是起点——把过程记下来，直接对应比赛提交要求，后面写报告能省一半时间。</div>
+        </div>
+      </div>
+
+      <div class="step"><input type="checkbox" id="s7-1"><label for="s7-1"><div class="step-text">在 <span class="reg">docs/hardware_setup.md</span> 中记录：摄像头型号（OV5640/OV7725）、接口引脚（cam_data[7:0]/cam_pclk/href/vsync/scl/sda）、HDMI OUT 接口引脚（clk/data_hdmi_out_p/n）与供电说明，与官方推荐目录结构对齐</div></label></div>
+
+      <div class="step"><input type="checkbox" id="s7-2"><label for="s7-2"><div class="step-text">保存关键验证证据：SCCB 读 ID 的日志截图、ILA 抓到的 href/vsync 时序波形、显示器实拍照片，放入 <span class="reg">metrics/evidence/</span></div></label></div>
+
+      <div class="step"><input type="checkbox" id="s7-3"><label for="s7-3"><div class="step-text">整理一份「从零复现」步骤清单，确保换一块同型号板卡、换一个人也能照着跑通——这是评分里「可复现性」的硬指标</div></label></div>
+    </section>
+
+    <footer>
+      <span>正点原子 Zynq-7015 · 并口摄像头 · HDMI 原生直出 · 上板调试 Runbook</span>
+      <span>勾选状态仅保存于本机浏览器</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var stages = Array.prototype.slice.call(document.querySelectorAll('.stage'));
+  var rail = document.getElementById('rail');
+  var STORAGE_KEY = 'zynq7015-bringup-progress-v1';
+
+  var state = {};
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = JSON.parse(raw) || {};
+  } catch(e) {}
+
+  function save(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+  }
+
+  // restore checkbox states
+  var allBoxes = Array.prototype.slice.call(document.querySelectorAll('.step input[type="checkbox"]'));
+  allBoxes.forEach(function(box){
+    if (state[box.id]) {
+      box.checked = true;
+      box.closest('.step').classList.add('done');
+    }
+    box.addEventListener('change', function(){
+      state[box.id] = box.checked;
+      box.closest('.step').classList.toggle('done', box.checked);
+      save();
+      updateProgress();
+    });
+  });
+
+  // build rail nav
+  var titles = {};
+  stages.forEach(function(st){
+    var id = st.getAttribute('data-stage');
+    var h2 = st.querySelector('h2');
+    titles[id] = h2 ? h2.textContent : ('阶段 ' + id);
+  });
+
+  stages.forEach(function(st){
+    var id = st.getAttribute('data-stage');
+    var item = document.createElement('button');
+    item.className = 'rail-item';
+    item.type = 'button';
+    item.dataset.stage = id;
+    var isRef = st.querySelector('.stage-badge.ref') !== null;
+    item.innerHTML = '<span class="rail-num">' + (isRef ? '·' : id) + '</span>' +
+                      '<span class="rail-dot' + (isRef ? '' : '') + '" data-dot="'+id+'"></span>' +
+                      '<span>' + titles[id] + '</span>';
+    item.addEventListener('click', function(){
+      st.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    rail.appendChild(item);
+  });
+
+  function stageCheckboxes(st){
+    return Array.prototype.slice.call(st.querySelectorAll('.step input[type="checkbox"]'));
+  }
+
+  function updateProgress(){
+    var total = allBoxes.length, done = 0;
+    allBoxes.forEach(function(b){ if (b.checked) done++; });
+
+    var fill = document.getElementById('progressFill');
+    var label = document.getElementById('progressLabel');
+    var pct = total ? Math.round(done/total*100) : 0;
+    fill.style.width = pct + '%';
+    label.textContent = done + ' / ' + total + ' 已完成';
+
+    stages.forEach(function(st){
+      var id = st.getAttribute('data-stage');
+      var boxes = stageCheckboxes(st);
+      var dot = rail.querySelector('[data-dot="'+id+'"]');
+      if (!dot || boxes.length === 0) return;
+      var d = 0;
+      boxes.forEach(function(b){ if (b.checked) d++; });
+      dot.classList.remove('done','doing');
+      if (d === boxes.length) dot.classList.add('done');
+      else if (d > 0) dot.classList.add('doing');
+    });
+  }
+
+  // active state on scroll
+  var railItems = Array.prototype.slice.call(rail.querySelectorAll('.rail-item'));
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting) {
+        var id = entry.target.getAttribute('data-stage');
+        railItems.forEach(function(it){
+          it.classList.toggle('active', it.dataset.stage === id);
+        });
+      }
+    });
+  }, { rootMargin: '-10% 0px -70% 0px', threshold: 0 });
+  stages.forEach(function(st){ io.observe(st); });
+
+  updateProgress();
+})();
+</script>
