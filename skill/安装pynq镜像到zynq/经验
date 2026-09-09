@@ -1,0 +1,69 @@
+# 安装 PYNQ 到 ZYNQ
+
+## 1. 准备镜像文件
+
+下载正点原子 ZYNQ 资料盘 A 盘 `4_Source_Code/6_PYNQ_Design/IMG`，解压。
+
+## 2. 准备烧录工具
+
+下载 [imageUSB](https://www.osforensics.com/tools/write-usb-images.html)，并查阅工具包内的 readme 学习使用方式。
+
+## 3. 烧录镜像到 SD 卡
+
+用自带读卡器将 SD 卡插入电脑，打开 imageUSB 工具：
+
+![alt text](image.png)
+
+- 勾选图中标注的 2 处
+- 4 处选择 PYNQ 镜像文件
+- 点击 Write，一路点 Yes，等待写入完成
+- 完成后**一定先点 Exit，再拔出 SD 卡**，再插入 ZYNQ
+
+## 4. 连接电脑与开发板
+
+1. 使用 USB Type-C 连接线，将开发板的 USB_UART（印刷字为 PS_UART）接口与电脑连接
+2. 使用千兆以太网线，将开发板的 PS 以太网口与联网的路由器或电脑的以太网接口相连
+3. 将烧录好 PYNQ 镜像的 Micro SD 卡插入底板的 Micro SD 卡槽
+4. 将开发板启动模式设置为 "SD CARD" 启动方式（红色小方块，上有两个白拨钮，附近印有模式说明）
+5. 连接开发板电源
+6. 打开电源开关
+
+## 5. 安装串口终端软件 MobaXterm
+
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+
+## 6. 用 MobaXterm 连接 ZYNQ 串口
+
+配置如下：
+
+| 参数         | 值          |
+|--------------|-------------|
+| 波特率       | 115200 bps  |
+| 数据位       | 8 data bits |
+| Stop Bit     | 1 stop bit  |
+| Parity       | None        |
+| Flow Control | None        |
+
+![alt text](image-5.png)
+![alt text](image-6.png)
+
+找 COM-CH340 的 Signal Port 即可。
+
+## 7. 确认烧录成功
+
+当串口出现如下信息时，说明镜像已成功拷贝到开发板：
+
+![alt text](8a0dcc5089461c28fec0174bee6ecb16.png)
+
+## 8. 安全关机 ⚠️⚠️⚠️⚠️⚠️
+
+**不能直接给板子断电！**
+
+断电前必须先在 MobaXterm 里执行关机指令：
+
+sudo shutdown -h now
+
+等系统关闭后才能断电。
