@@ -1,0 +1,26 @@
+{
+  "verification_passed": true,
+  "candidate_status_is_unvalidated": true,
+  "parameter_file_hash_ok": true,
+  "quantized_parameters_recreated_exactly": {
+    "conv_weight_int8": true,
+    "conv_bias_int32": true,
+    "fc_weight_int8": true,
+    "fc_bias_int32": true
+  },
+  "parameter_shapes_and_dtypes": {
+    "conv_weight": true,
+    "conv_bias": true,
+    "fc_weight": true,
+    "fc_bias": true
+  },
+  "scale_alignment": {
+    "conv_product_and_bias": true,
+    "conv_requant_shift": true,
+    "fc_product_and_bias": true,
+    "common_fc_score_scale": true
+  },
+  "integer_example_recreated_exactly": true,
+  "int32_headroom_confirmed": true,
+  "accuracy_evaluated_in_this_step": false
+}

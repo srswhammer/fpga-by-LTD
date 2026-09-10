@@ -1,0 +1,203 @@
+{
+  "release": "digitcnn_v1_int8",
+  "file_count": 33,
+  "files": {
+    "parameters/model_parameters_int.npz": {
+      "sha256": "9cac4267a3dd78235c17ba2c9bc074216eb37fb7d592cd1f3214ea4200deeded",
+      "format": "compressed NumPy archive"
+    },
+    "parameters/conv_weight_int8.npy": {
+      "sha256": "1827f0a08dc19dc61d47a3dddd5208a359cdb0dd9481b0c7d7dd86ade1bbcb96",
+      "dtype": "|i1",
+      "shape": [
+        4,
+        1,
+        3,
+        3
+      ],
+      "array_order": "C / row-major"
+    },
+    "parameters/conv_weight_int8.mem": {
+      "sha256": "6a1113d9060002afc07d67ce155ef7f0686afaa8dc487f069645cb0f701dbf67",
+      "format": "one two's-complement hexadecimal integer per line"
+    },
+    "parameters/conv_bias_int32.npy": {
+      "sha256": "9e3f0a5c6ce0d9e019cb18204c04a3f8d7e398d950a22691e7a27c0f6f272879",
+      "dtype": "<i4",
+      "shape": [
+        4
+      ],
+      "array_order": "C / row-major"
+    },
+    "parameters/conv_bias_int32.mem": {
+      "sha256": "23d08ccabc8403226475aa02b5bcad4de137db09b60308a92d62fff94163802f",
+      "format": "one two's-complement hexadecimal integer per line"
+    },
+    "parameters/fc_weight_int8.npy": {
+      "sha256": "43c07c63a72cb87160c9e5199a42c72252c38cdc49701f47ead1a4e2ba3e0d6d",
+      "dtype": "|i1",
+      "shape": [
+        10,
+        676
+      ],
+      "array_order": "C / row-major"
+    },
+    "parameters/fc_weight_int8.mem": {
+      "sha256": "1a6a42b475606a26b202e4586a0f243c21ca6e445fe2315a4856ae5491c83480",
+      "format": "one two's-complement hexadecimal integer per line"
+    },
+    "parameters/fc_bias_int32.npy": {
+      "sha256": "5d34e2a0db6b8e0c1cc15a284dd17614f1b6613bca5aa46dc40f9d54d7fbb6d9",
+      "dtype": "<i4",
+      "shape": [
+        10
+      ],
+      "array_order": "C / row-major"
+    },
+    "parameters/fc_bias_int32.mem": {
+      "sha256": "3fefcdbe618efb8849904ceb2ade9f80644d1593250a56a7bac18e51cb05ab11",
+      "format": "one two's-complement hexadecimal integer per line"
+    },
+    "parameters/model_parameters_v1.bin": {
+      "sha256": "6f7d81275595b69acafe4f966aa77b38a11f80aa416006e675926cd2f163ada2",
+      "format": "binary"
+    },
+    "parameters/binary_layout.json": {
+      "sha256": "58e0b80d6ebb58bd67a309289559b2d044d49df232e3c181baca9e4498e00a47",
+      "format": "JSON"
+    },
+    "reference/fixed_inputs_uint8.npy": {
+      "sha256": "6cb096221378deadc4495b9adf36c4884e91e04f840764129d6573c0c048169c",
+      "dtype": "|u1",
+      "shape": [
+        10,
+        28,
+        28
+      ],
+      "array_order": "C / row-major"
+    },
+    "reference/labels_int64.npy": {
+      "sha256": "f314ddddf18999d4890f4fec8bb6539fc62b6f41861fa85e1c04c98a03097dda",
+      "dtype": "<i8",
+      "shape": [
+        10
+      ],
+      "array_order": "C / row-major"
+    },
+    "reference/conv_acc_int32.npy": {
+      "sha256": "624497cbb2a3c885bc95d68e65e70537d6aaff88f89bff5d8beb62f24732a70a",
+      "dtype": "<i4",
+      "shape": [
+        10,
+        4,
+        26,
+        26
+      ],
+      "array_order": "C / row-major"
+    },
+    "reference/relu_uint8.npy": {
+      "sha256": "3138e8048fa783a4990ff5ba916846088c5df770d170dfb73f86618f9bdf1f15",
+      "dtype": "|u1",
+      "shape": [
+        10,
+        4,
+        26,
+        26
+      ],
+      "array_order": "C / row-major"
+    },
+    "reference/pool_uint8.npy": {
+      "sha256": "ba772ed3247db003f48a0b32aedd994831b223393353e0cf35d729377b8d0b3b",
+      "dtype": "|u1",
+      "shape": [
+        10,
+        4,
+        13,
+        13
+      ],
+      "array_order": "C / row-major"
+    },
+    "reference/flatten_uint8.npy": {
+      "sha256": "6297e9a0bc7a29530f3e9f7b63a4007de225df78cd8f3aba3cbd0c3be2eb297c",
+      "dtype": "|u1",
+      "shape": [
+        10,
+        676
+      ],
+      "array_order": "C / row-major"
+    },
+    "reference/scores_int32.npy": {
+      "sha256": "c5cedd28d9bd56a394e95a3a33f0998b641f2392178b754f52b0f3f2cb954ff8",
+      "dtype": "<i4",
+      "shape": [
+        10,
+        10
+      ],
+      "array_order": "C / row-major"
+    },
+    "reference/predictions_int64.npy": {
+      "sha256": "f314ddddf18999d4890f4fec8bb6539fc62b6f41861fa85e1c04c98a03097dda",
+      "dtype": "<i8",
+      "shape": [
+        10
+      ],
+      "array_order": "C / row-major"
+    },
+    "evaluation/validation_predictions.npz": {
+      "sha256": "7bdc9e4b4b3c28caf2fb7120b56471288768e6b1f56b6132af71ee3df6862712",
+      "format": "labels, float predictions/scores, integer predictions/scores"
+    },
+    "evaluation/validation_confusion_int8.csv": {
+      "sha256": "dfab87316f0daa2ee5f53609b69316df58cd37760d30932a7a440001e205e070",
+      "format": "10x10 CSV; rows true, columns predicted"
+    },
+    "evaluation/validation_per_class_accuracy.csv": {
+      "sha256": "4179235dbb35e10714dc7af140f3cb703b6e4ebaffadc32a578735c69045c12c",
+      "format": "UTF-8 CSV per-class float32 and int8 accuracy"
+    },
+    "evaluation/official_test_predictions.npz": {
+      "sha256": "19d2f36cae7e3583632d72768a3d3447ddd8ae7487e326f5205fbc30a24bc85e",
+      "format": "labels, float predictions/scores, integer predictions/scores"
+    },
+    "evaluation/official_test_confusion_int8.csv": {
+      "sha256": "20c34eaabba200dd0dfec84cae48078318abc8e0c673023797d309d6bf2b690f",
+      "format": "10x10 CSV; rows true, columns predicted"
+    },
+    "evaluation/official_test_per_class_accuracy.csv": {
+      "sha256": "4a80b36f7c6fc71380bc3a20978ed04a1ea06a55c45810a6a74ed27f4395bbaa",
+      "format": "UTF-8 CSV per-class float32 and int8 accuracy"
+    },
+    "evaluation/synthetic_camera_like_predictions.npz": {
+      "sha256": "544075a58f012ced33fb8cba851916f6550c56d69f29213f71089676d53f2630",
+      "format": "labels, float predictions/scores, integer predictions/scores"
+    },
+    "evaluation/synthetic_camera_like_confusion_int8.csv": {
+      "sha256": "ef3b7e749a2710c79d6253c5e51d68d58cc83505d30a342241f8930e624a6503",
+      "format": "10x10 CSV; rows true, columns predicted"
+    },
+    "evaluation/synthetic_camera_like_per_class_accuracy.csv": {
+      "sha256": "9bd852aa46e9c87dd4753b727511dea7de6e01d909fed7d28595a9e397fbcba3",
+      "format": "UTF-8 CSV per-class float32 and int8 accuracy"
+    },
+    "evaluation/summary.json": {
+      "sha256": "1bea5964286f30b4992fbed860097015eeff7dee9208c11eb22a1d9e042c31f0",
+      "format": "JSON"
+    },
+    "evaluation/accuracy_comparison.png": {
+      "sha256": "a68cae1775b7b70fa1e32b3944034acda5d51cd2564b73783c425bad5c8eaca7",
+      "format": "PNG visualization"
+    },
+    "evaluation/official_test_confusion_int8.png": {
+      "sha256": "8ff7817fb224dbef7b02d756538b985bd37bd9c69aeb192b3435be175a97cce2",
+      "format": "PNG visualization"
+    },
+    "evaluation/official_test_quantization_disagreements.png": {
+      "sha256": "cfb560936820b0dd3efe55d8d28548fa0105df0cba3a749ed5fda74b25d218d5",
+      "format": "PNG visualization"
+    },
+    "config.json": {
+      "sha256": "7c81af0b71b917b79bf8b4b6de675e9795e2e248e439e3ff9cfca530a4928b27",
+      "format": "JSON"
+    }
+  }
+}

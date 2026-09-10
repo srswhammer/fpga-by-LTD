@@ -1,0 +1,26 @@
+{
+  "verification_passed": true,
+  "release_status": "FIRST_INTEGER_SOFTWARE_RELEASE_READY_FOR_TEAM_REVIEW",
+  "manifest_hashes_ok": true,
+  "npy_parameter_copies_exact": true,
+  "verilog_mem_parameter_copies_exact": true,
+  "packed_binary_parameter_copies_exact": true,
+  "packed_binary_bytes": 6852,
+  "fixed_layer_outputs_recomputed_exactly": {
+    "conv_acc": true,
+    "relu": true,
+    "pool": true,
+    "flatten": true,
+    "scores": true,
+    "predictions": true
+  },
+  "fixed_0_to_9_all_correct": true,
+  "evaluation_files_consistent": true,
+  "confusion_matrix_totals": {
+    "validation": 5000,
+    "official_test": 10000,
+    "synthetic_camera_like": 1000
+  },
+  "accuracy_acceptance_passed": true,
+  "fpga_hardware_verified": false
+}

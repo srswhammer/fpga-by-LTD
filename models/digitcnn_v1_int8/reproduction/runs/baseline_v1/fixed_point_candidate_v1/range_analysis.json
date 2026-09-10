@@ -1,0 +1,63 @@
+{
+  "training_relu_channel_max_float32": [
+    3.0418758392333984,
+    2.7921810150146484,
+    3.287644624710083,
+    2.5249080657958984
+  ],
+  "training_relu_global_max_float32": 3.287644624710083,
+  "activation_representable_max": 3.984375,
+  "activation_headroom": 0.696730375289917,
+  "conv_weight_quantization": {
+    "float_abs_max": 1.5750019550323486,
+    "integer_min": -101,
+    "integer_max": 69,
+    "saturated_count": 0,
+    "max_absolute_quantization_error": 0.007161431014537811,
+    "root_mean_square_quantization_error": 0.004647311065891722
+  },
+  "fc_weight_quantization": {
+    "float_abs_max": 1.0780725479125977,
+    "integer_min": -69,
+    "integer_max": 51,
+    "saturated_count": 0,
+    "max_absolute_quantization_error": 0.007811799645423889,
+    "root_mean_square_quantization_error": 0.004503258382699689
+  },
+  "conv_accumulator_conservative_absolute_bound_by_channel": [
+    58362,
+    54336,
+    129849,
+    59553
+  ],
+  "conv_accumulator_conservative_absolute_bound_max": 129849,
+  "conv_accumulator_minimum_signed_bits_for_bound": 18,
+  "fc_accumulator_conservative_absolute_bound_by_class": [
+    1109702,
+    1144421,
+    1076077,
+    1074378,
+    1225592,
+    1190603,
+    1111546,
+    1065168,
+    1088484,
+    1065283
+  ],
+  "fc_accumulator_conservative_absolute_bound_max": 1225592,
+  "fc_accumulator_minimum_signed_bits_for_bound": 22,
+  "int32_headroom_confirmed": true,
+  "parameter_storage_bytes": {
+    "conv_weight_int8": 36,
+    "conv_bias_int32": 16,
+    "fc_weight_int8": 6760,
+    "fc_bias_int32": 40,
+    "total": 6852
+  },
+  "activation_storage_bytes_per_image": {
+    "input_uint8": 784,
+    "conv_relu_uint8": 2704,
+    "pool_uint8": 676,
+    "scores_int32": 40
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "initial_loss": 2.3019590377807617,
+  "final_loss": 0.42259475588798523,
+  "steps": 20,
+  "sample_count": 32,
+  "passed": true,
+  "note": "Disposable model; not validation accuracy or final weights"
+}

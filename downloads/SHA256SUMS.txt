@@ -1,0 +1,1 @@
+ec68adad476dd06dcabda48b5f08c5185d4a0367d4a47b92c8e6c4ad8acadc93  digitcnn_v1_int8_handoff_v1.zip
