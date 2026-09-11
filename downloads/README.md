@@ -1,6 +1,7 @@
 # 模型交接下载
 
 - **[下载 digitcnn_v1_int8 完整交接 ZIP](digitcnn_v1_int8_handoff_v1.zip)**（GitHub 文件页点击 Download raw file）。
+- [逐文件用途说明](../models/digitcnn_v1_int8/docs/FILE_GUIDE.md)（ZIP 内也包含，保持文件夹完整）。
 - [SHA-256 校验值](SHA256SUMS.txt)。
 - [先在线阅读交接首页](../models/digitcnn_v1_int8/README.md)。
 

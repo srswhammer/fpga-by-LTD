@@ -6,6 +6,7 @@
 
 | 入口 | 内容 |
 |---|---|
+| [逐文件用途说明](models/digitcnn_v1_int8/docs/FILE_GUIDE.md) | 按原目录解释全部文件，标明 A/C 阅读顺序 |
 | [A：硬件接手](models/digitcnn_v1_int8/docs/FOR_A.md) | 定点规则、参数、逐层答案和接口协商项 |
 | [C：Notebook 与联调](models/digitcnn_v1_int8/docs/FOR_C.md) | 图片预处理、纯整数调用、摄像头 ROI 要求 |
 | [在线查看 Notebook](models/digitcnn_v1_int8/demo.ipynb) | 可复现的软件演示 |
