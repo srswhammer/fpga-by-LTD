@@ -12,10 +12,12 @@
 // 后续接 DMA/AXI 时，在这一层外面再包一层适配壳即可，无需改动内部数据通路。
 //
 module cnn_top #(
-    parameter CONV_WEIGHT_MEMFILE = "../../B_模型交接_v1/generated_fpga/conv_weight_int8.mem",
-    parameter CONV_BIAS_MEMFILE   = "../../B_模型交接_v1/generated_fpga/conv_bias_int32.mem",
-    parameter FC_WEIGHT_MEMFILE   = "../../B_模型交接_v1/generated_fpga/fc_weight_int8.mem",
-    parameter FC_BIAS_MEMFILE     = "../../B_模型交接_v1/generated_fpga/fc_bias_int32.mem"
+    // 默认路径见 conv_pool_unit.v / fc_argmax_unit.v 顶部说明：指向
+    // module/params/ 的 ASCII 副本，避免中文相对路径读取失败。
+    parameter CONV_WEIGHT_MEMFILE = "../params/conv_weight_int8.mem",
+    parameter CONV_BIAS_MEMFILE   = "../params/conv_bias_int32.mem",
+    parameter FC_WEIGHT_MEMFILE   = "../params/fc_weight_int8.mem",
+    parameter FC_BIAS_MEMFILE     = "../params/fc_bias_int32.mem"
 )(
     input  wire        clk,
     input  wire        rst_n,

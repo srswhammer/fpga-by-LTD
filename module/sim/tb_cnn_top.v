@@ -61,6 +61,10 @@ module tb_cnn_top;
     reg signed [31:0] got_score;
     reg signed [31:0] want_score;
 
+    // 所有驱动 DUT 输入的赋值都在时钟沿之后延迟 1 个时间单位再改变，
+    // 避免和 DUT 内部同步在同一个仿真时刻抢跑（经典的测试激励竞争问题，
+    // 用 input_buffer 单独测试复现确认过：不加这个延迟会导致隔一个地址
+    // 丢一次写入）。
     task load_image;
         input integer idx;
         begin
@@ -69,6 +73,7 @@ module tb_cnn_top;
                 img_wr_addr = byte_idx[9:0];
                 img_wr_data = images[idx*IMG_BYTES + byte_idx];
                 @(posedge clk);
+                #1;
             end
             img_wr_en = 1'b0;
         end
@@ -84,15 +89,19 @@ module tb_cnn_top;
         fail_count = 0;
 
         repeat (3) @(posedge clk);
+        #1;
         rst_n = 1'b1;
         repeat (2) @(posedge clk);
+        #1;
 
         for (img_idx = 0; img_idx < N_IMAGES; img_idx = img_idx + 1) begin
             load_image(img_idx);
 
             @(posedge clk);
+            #1;
             start = 1'b1;
             @(posedge clk);
+            #1;
             start = 1'b0;
 
             wait (done == 1'b1);

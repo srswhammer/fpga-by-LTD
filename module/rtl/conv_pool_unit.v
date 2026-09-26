@@ -17,8 +17,12 @@
 // 26x26 特征图，节省存储。
 //
 module conv_pool_unit #(
-    parameter CONV_WEIGHT_MEMFILE = "../../B_模型交接_v1/generated_fpga/conv_weight_int8.mem",
-    parameter CONV_BIAS_MEMFILE   = "../../B_模型交接_v1/generated_fpga/conv_bias_int32.mem"
+    // 默认指向 module/params/ 下的 ASCII 路径副本（由
+    // module/scripts/同步参数.py 从 B_模型交接_v1/generated_fpga/ 复制而来）。
+    // 不直接引用中文目录路径，因为部分仿真/综合工具的 $readmemh 在处理
+    // 含中文字符的相对路径时会读取失败（曾用 Icarus Verilog 实测复现）。
+    parameter CONV_WEIGHT_MEMFILE = "../params/conv_weight_int8.mem",
+    parameter CONV_BIAS_MEMFILE   = "../params/conv_bias_int32.mem"
 )(
     input  wire        clk,
     input  wire        rst_n,

@@ -1,0 +1,8 @@
+*.vvp
+work/
+transcript
+*.wlf
+
+# 由 scripts/同步参数.py 从 B_模型交接_v1/generated_fpga/ 现场复制生成，
+# 和 generated_fpga/ 本身一样不入库，避免和唯一参数 parameters.npz 产生分歧。
+params/*.mem

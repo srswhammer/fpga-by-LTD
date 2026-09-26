@@ -7,8 +7,10 @@
 // 更新最优解，天然保留先出现（编号更小）的那个。
 //
 module fc_argmax_unit #(
-    parameter FC_WEIGHT_MEMFILE = "../../B_模型交接_v1/generated_fpga/fc_weight_int8.mem",
-    parameter FC_BIAS_MEMFILE   = "../../B_模型交接_v1/generated_fpga/fc_bias_int32.mem"
+    // 见 conv_pool_unit.v 顶部说明：默认路径指向 module/params/ 的 ASCII 副本，
+    // 避免中文相对路径在部分工具的 $readmemh 里读取失败。
+    parameter FC_WEIGHT_MEMFILE = "../params/fc_weight_int8.mem",
+    parameter FC_BIAS_MEMFILE   = "../params/fc_bias_int32.mem"
 )(
     input  wire        clk,
     input  wire        rst_n,
