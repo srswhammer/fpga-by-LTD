@@ -1,2 +1,8 @@
 no_share/
 wave drom.zip
+
+# Vivado 自动生成的缓存、工程运行结果和临时文件
+**/.Xil/
+**/vivado/
+**/-p/
+**/dfx_runtime.txt
