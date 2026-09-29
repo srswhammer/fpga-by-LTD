@@ -19,6 +19,7 @@ OV5640 → FPGA 图像前端 → AXI4-Stream → VDMA → DDR → NumPy → RGB 
 - `build_overlay.tcl`：创建 PS7、VDMA、DDR 通路并生成 Overlay。
 - `camera_capture.bit`：上传到 PYNQ 的 FPGA 配置文件。
 - `camera_capture.hwh`：PYNQ 识别 IP 和地址所需的硬件描述文件。
+- `camera_capture_demo.ipynb`：已验证的 Overlay 加载、单帧拍摄和画面显示示例，内含一次成功采集结果。
 
 上传时必须让 `camera_capture.bit` 与 `camera_capture.hwh` 位于 Jupyter 的同一文件夹，并保持相同的主文件名。
 
