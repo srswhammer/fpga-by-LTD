@@ -98,6 +98,7 @@ def preprocess_digit_image(
 def _normalize_gray(
     original: np.ndarray, polarity: Polarity,
     output_size: int = 28, content_size: int = 19, minimum_contrast: float = 20.0,
+    foreground_fraction: float = 0.05,
 ) -> PreprocessResult:
     # 大图先用 3×3 中值滤波抑制孤立噪声；28×28 输入不经过此滤波。
     if min(original.shape) >= 64:
@@ -139,8 +140,8 @@ def _normalize_gray(
         contrast_image = original.copy()
         strength = contrast_image.astype(np.float32)
 
-    # 阈值掩码只用来找边界，裁剪时仍保留灰度笔画，不强制二值化。
-    threshold = 255.0 * 0.05
+    # 掩码只确定裁剪边界；提高阈值可减少纸纹干扰，裁剪内容仍保留灰度。
+    threshold = 255.0 * foreground_fraction
     mask = strength >= threshold
     rows, columns = np.nonzero(mask)
     if rows.size < 4:
@@ -218,15 +219,16 @@ def preprocess_sudoku_cell(source: ImageSource, *, polarity: Polarity = "auto") 
     resolved = ("dark_on_light" if background >= 127.5 else "light_on_dark") if polarity == "auto" else polarity
     if original.shape == (28,28) and resolved == "light_on_dark" and background <= 8:
         return PreprocessResult(original,original.copy(),original.copy(),original.copy(),
-                                {"profile":"sudoku_cell_v1","normalization_action":"canonical bytes preserved",
+                                {"profile":"sudoku_cell_v2","normalization_action":"canonical bytes preserved",
                                  "resolved_polarity":resolved})
     try:
-        result = _normalize_gray(original, polarity)
-        result.metadata['profile'] = 'sudoku_cell_v1'
+        # 数独照片用20%边界阈值，避免背景扩大裁剪框；旧数字入口仍用5%。
+        result = _normalize_gray(original, polarity, foreground_fraction=0.20)
+        result.metadata['profile'] = 'sudoku_cell_v2'
         return result
     except NoForegroundError as error:
         blank = np.zeros((28,28), dtype=np.uint8)
         return PreprocessResult(original,blank.copy(),blank.copy(),blank,
-                                {"profile":"sudoku_cell_v1","resolved_polarity":resolved,
+                                {"profile":"sudoku_cell_v2","resolved_polarity":resolved,
                                  "warning":"未检测到足够对比度的笔画；按空白候选输入。淡字可能被漏检，需检查原图。",
                                  "reason":str(error)})

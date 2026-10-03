@@ -64,7 +64,7 @@ def integer_scores(inputs, params, manifest):
 
 # 加载一次，随后可反复传入单张或一批 28×28 的 UINT8 图片
 class Predictor:
-    def __init__(self, backend='fp32'):
+    def __init__(self, backend='int8'):
         self.backend = backend
         if backend == 'fp32':
             torch.set_num_threads(4)
@@ -107,7 +107,7 @@ class Predictor:
 
 
 # 自检用于检查文件完整性与运行环境，不等同于完整测试集准确率
-def self_test():
+def self_test(backend='int8'):
     with np.load(HERE / 'self_test.npz', allow_pickle=False) as data:
         images, labels = data['inputs_uint8'], data['labels']
     blanks = [preprocess_sudoku_cell(np.full((64, 64), value, dtype=np.uint8)).normalized_uint8
@@ -118,14 +118,13 @@ def self_test():
         '000000000', '000000001', '000000010', '000000100', '000001000',
         '000010000', '000100000', '001000000', '010000000', '100000000'
     ]
-    for backend in ('fp32', 'int8'):
-        codes, scores = Predictor(backend).predict_one_hot(images)
-        predictions = scores.argmax(1)
-        if not np.array_equal(predictions, labels):
-            raise RuntimeError(f'{backend} 自检失败：{predictions.tolist()}')
-        if codes != [expected_codes[label] for label in labels]:
-            raise RuntimeError(f'{backend} 独热编码自检失败：{codes}')
-        print(f'{backend}：空白及数字 1～9、黑底/白底空白、9位独热编码自检通过。')
+    codes, scores = Predictor(backend).predict_one_hot(images)
+    predictions = scores.argmax(1)
+    if not np.array_equal(predictions, labels):
+        raise RuntimeError(f'{backend} 自检失败：{predictions.tolist()}')
+    if codes != [expected_codes[label] for label in labels]:
+        raise RuntimeError(f'{backend} 独热编码自检失败：{codes}')
+    print(f'{backend}：空白及数字 1～9、黑底/白底空白、9位独热编码自检通过。')
 
 
 # 命令入口：输入应是裁好的单格，不是整张数独
@@ -133,12 +132,12 @@ def main():
     parser = argparse.ArgumentParser(description='v2.4 数独单格识别（空白及 1～9）')
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument('--image', type=Path, help='单个数字或空白格图片')
-    action.add_argument('--self-test', action='store_true', help='同时自检浮点版与整数版')
-    parser.add_argument('--backend', choices=['fp32', 'int8'], default='fp32')
+    action.add_argument('--self-test', action='store_true', help='自检所选后端，默认INT8')
+    parser.add_argument('--backend', choices=['fp32', 'int8'], default='int8')
     parser.add_argument('--polarity', choices=['auto', 'dark_on_light', 'light_on_dark'], default='auto')
     args = parser.parse_args()
     if args.self_test:
-        self_test()
+        self_test(args.backend)
         return
     print(Predictor(args.backend).predict_image(args.image, args.polarity))
 
