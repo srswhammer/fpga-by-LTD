@@ -6,3 +6,10 @@ wave drom.zip
 **/vivado/
 **/-p/
 **/dfx_runtime.txt
+
+# Python 自动生成的缓存文件
+**/__pycache__/
+**/*.pyc
+
+# Jupyter 自动保存的检查点
+**/.ipynb_checkpoints/
