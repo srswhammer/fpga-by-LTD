@@ -3,14 +3,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Union
 
 import numpy as np
 from PIL import Image, ImageFilter, ImageOps
 
 
 Polarity = Literal["auto", "dark_on_light", "light_on_dark"]
-ImageSource = str | Path | Image.Image | np.ndarray
+ImageSource = Union[str, Path, Image.Image, np.ndarray]
+# 兼容板上 Python 3.8 和旧版 Pillow；新旧名称均为同一种双三次插值。
+BICUBIC = Image.Resampling.BICUBIC if hasattr(Image, 'Resampling') else Image.BICUBIC
 
 
 class NoForegroundError(ValueError):
@@ -162,7 +164,7 @@ def _normalize_gray(
         resized_width = max(1, int(round(cropped.shape[1] * scale)))
         resized = np.asarray(
             Image.fromarray(cropped, mode="L").resize(
-                (resized_width, resized_height), Image.Resampling.BICUBIC
+                (resized_width, resized_height), BICUBIC
             ),
             dtype=np.uint8,
         )
@@ -232,3 +234,45 @@ def preprocess_sudoku_cell(source: ImageSource, *, polarity: Polarity = "auto") 
                                 {"profile":"sudoku_cell_v2","resolved_polarity":resolved,
                                  "warning":"未检测到足够对比度的笔画；按空白候选输入。淡字可能被漏检，需检查原图。",
                                  "reason":str(error)})
+
+
+# 单独导出FPGA输入，不运行CNN；PNG用于查看，HEX用于读取784个UINT8像素。
+def export_preprocessed_images(source, output_directory=None, *, polarity: Polarity = "auto"):
+    source = Path(source).resolve()
+    output = Path(output_directory).resolve() if output_directory else Path(__file__).resolve().parent / '预处理图像'
+    extensions = {'.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff', '.webp'}
+    root = source.parent if source.is_file() else source
+    files = [source] if source.is_file() else sorted(
+        p for p in source.rglob('*')
+        if p.is_file() and p.suffix.lower() in extensions and output not in p.resolve().parents
+    )
+    if not files:
+        raise FileNotFoundError(f'没有找到单格图片：{source}')
+    relative_paths = [p.relative_to(root).with_suffix('.png') for p in files]
+    if len(set(relative_paths)) != len(relative_paths):
+        raise ValueError('同目录存在同名不同扩展名图片，请先区分名称，避免导出覆盖。')
+    exported = []
+    for path, relative in zip(files, relative_paths):
+        pixels = preprocess_sudoku_cell(path, polarity=polarity).normalized_uint8
+        png_path = output / 'PNG' / relative
+        hex_path = output / 'HEX' / relative.with_suffix('.hex')
+        png_path.parent.mkdir(parents=True, exist_ok=True)
+        hex_path.parent.mkdir(parents=True, exist_ok=True)
+        Image.fromarray(pixels).save(png_path)
+        with hex_path.open('w', encoding='ascii', newline='\n') as stream:
+            stream.write(''.join(f'{int(value):02X}\n' for value in pixels.ravel(order='C')))
+        exported.append((path, png_path, hex_path))
+    return exported
+
+
+# 在本目录执行：python -B preprocess.py --input "单格图片或数据集目录"
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='导出28×28灰度PNG和FPGA逐像素HEX，不运行CNN')
+    parser.add_argument('--input', type=Path, required=True, help='裁好的单格图片或其目录，支持子目录')
+    parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parent / '预处理图像')
+    parser.add_argument('--polarity', choices=['auto', 'dark_on_light', 'light_on_dark'], default='auto')
+    args = parser.parse_args()
+    items = export_preprocessed_images(args.input, args.output, polarity=args.polarity)
+    print(f'已导出 {len(items)} 张；PNG：{args.output / "PNG"}；HEX：{args.output / "HEX"}')
