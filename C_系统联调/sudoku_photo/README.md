@@ -32,6 +32,8 @@ python recognize.py "C:\Users\dingy\Desktop\sudoku_test_1008_01.png"
 
 ## 输出与接口
 
+组长约定的图片交接目录为仓库根目录 `pynq/cells/`，文件名 `00.png`～`80.png`，包含空白格，按行排列。使用 `--cells-dir pynq/cells --cells-only` 导出裁切、去线及光照修正后的黑字浅底灰度单格，后续由组长调用TBR单格预处理及硬件CNN。默认完整流程在结果目录的 `cells/` 导出同样的图片。目录说明及当前实拍交接样本见 `pynq/README.md`。
+
 - `predicted_board.txt`：九行九列预测数字，0为空白。
 - `01_detected_board.png`、`02_rectified_board.png`：棋盘定位及校正图。
 - `03_raw_cells_contact.png`、`04_model_inputs_contact.png`：81格原图与主路模型输入；单格图片保存在 `cells_raw/`、`cells_28x28/`。

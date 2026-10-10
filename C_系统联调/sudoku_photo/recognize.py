@@ -48,7 +48,7 @@ def isolate_digit(cell):
     return cleaned
 
 
-def process_photo(source, output, model=DEFAULT_MODEL):
+def process_photo(source, output, model=DEFAULT_MODEL, cells_directory=None, cells_only=False):
     """识别一张照片，保存检查材料并返回结果字典；不求解、不发送串口。"""
     SOURCE = Path(source).resolve()
     ROOT = Path(output).resolve()
@@ -150,6 +150,8 @@ def process_photo(source, output, model=DEFAULT_MODEL):
     Image.fromarray(corrected).save(ROOT/'02b_illumination_corrected.png')
     raw_dir=ROOT/'cells_raw'; normalized_dir=ROOT/'cells_28x28'
     raw_dir.mkdir(exist_ok=True); normalized_dir.mkdir(exist_ok=True)
+    handoff_dir=Path(cells_directory).resolve() if cells_directory else ROOT/'cells'
+    handoff_dir.mkdir(parents=True,exist_ok=True)
     inputs=[]; comparison_inputs=[]; metadata=[]; raw_cells=[]
     for row in range(9):
         for col in range(9):
@@ -160,6 +162,10 @@ def process_photo(source, output, model=DEFAULT_MODEL):
             name=f'r{row+1}_c{col+1}.png'
             Image.fromarray(cell).save(raw_dir/name)
             clean_cell=isolate_digit(corrected[y0+my:y1-my,x0+mx:x1-mx])
+            # Team handoff: cropped grayscale cells; TBR performs normalization next.
+            Image.fromarray(clean_cell).save(handoff_dir/f'{row*9+col:02d}.png')
+            if cells_only:
+                continue
             result=preprocess_sudoku_cell(clean_cell,polarity='dark_on_light')
             inputs.append(result.normalized_uint8)
             comparison_cell=isolate_digit(comparison_corrected[y0+my:y1-my,x0+mx:x1-mx])
@@ -167,6 +173,9 @@ def process_photo(source, output, model=DEFAULT_MODEL):
                 comparison_cell,polarity='dark_on_light').normalized_uint8)
             Image.fromarray(result.normalized_uint8).save(normalized_dir/name)
             metadata.append({'row':row+1,'column':col+1,'crop_xyxy':[x0+mx,y0+my,x1-mx,y1-my],**result.metadata})
+    if cells_only:
+        print(f'81 grayscale cells exported: {handoff_dir}')
+        return {'source':str(SOURCE),'cells_directory':str(handoff_dir),'cell_count':81}
     inputs=np.stack(inputs)
     assert inputs.shape==(81,28,28) and inputs.dtype==np.uint8
     np.save(ROOT/'model_inputs_uint8.npy',inputs)
@@ -245,12 +254,14 @@ def main():
     parser.add_argument('photo', type=Path, help='Input photo; keep all four board corners visible')
     parser.add_argument('--output', type=Path, help='New or empty output directory')
     parser.add_argument('--model', type=Path, default=DEFAULT_MODEL, help='Trusted team model directory')
+    parser.add_argument('--cells-dir', type=Path, help='Export numbered grayscale cells to this directory')
+    parser.add_argument('--cells-only', action='store_true', help='Export cells without running software CNN')
     args = parser.parse_args()
     output = args.output or Path(__file__).resolve().parent / 'results' / args.photo.stem
     if output.exists() and any(output.iterdir()):
         parser.error('Output directory is not empty; choose another --output directory.')
     try:
-        process_photo(args.photo, output, args.model)
+        process_photo(args.photo, output, args.model, args.cells_dir, args.cells_only)
     except (OSError, ValueError, RuntimeError, StopIteration) as exc:
         parser.exit(1, f'Failed: {exc}\n')
 
