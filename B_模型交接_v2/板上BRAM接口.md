@@ -7,6 +7,8 @@
 
 依赖PYNQ、NumPy、Pillow，不需要Torch。使用已经加载的Overlay：
 
+本板的AXI BRAM控制器登记在 `overlay.mem_dict`，`open_bram()` 从中读取 `phys_addr` 和 `addr_range`，不查询 `ip_dict`。
+
 ```python
 from board_bram import open_bram, write_image, write_pixels
 

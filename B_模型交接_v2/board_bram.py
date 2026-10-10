@@ -4,11 +4,11 @@ import numpy as np
 from preprocess import preprocess_sudoku_cell
 
 
-# 从已加载Overlay的HWH信息取得BRAM地址；ip_name填写实际AXI BRAM控制器名称。
+# 从已加载Overlay的mem_dict取得BRAM地址；ip_name填写实际AXI BRAM控制器名称。
 def open_bram(overlay, ip_name):
     from pynq import MMIO
 
-    info = overlay.ip_dict[ip_name]
+    info = overlay.mem_dict[ip_name]
     return MMIO(info['phys_addr'], info['addr_range'])
 
 
