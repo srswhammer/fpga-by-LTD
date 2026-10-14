@@ -1,0 +1,84 @@
+{
+  "status": "software_integer_reference_only",
+  "class_names": [
+    "空白",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9"
+  ],
+  "checkpoint_sha256": "3a50be812b7d51d76d446bea8bc838013ce78e8040cd29d801e44f73fa8e9b64",
+  "input_exponent": -8,
+  "calibration": "128 original training samples/class plus their seeded augmentation; no validation/test",
+  "calibration_maxima": [
+    5.138730525970459,
+    10.896954536437988
+  ],
+  "layers": {
+    "conv1": {
+      "weight_exponent": -6,
+      "input_exponent": -8,
+      "bias_exponent": -14,
+      "worst_case_accumulator_bound": 116954,
+      "weight_shape": [
+        4,
+        1,
+        3,
+        3
+      ],
+      "bias_shape": [
+        4
+      ],
+      "output_exponent": -5,
+      "right_shift": 9
+    },
+    "conv2": {
+      "weight_exponent": -6,
+      "input_exponent": -5,
+      "bias_exponent": -11,
+      "worst_case_accumulator_bound": 201305,
+      "weight_shape": [
+        8,
+        4,
+        3,
+        3
+      ],
+      "bias_shape": [
+        8
+      ],
+      "output_exponent": -4,
+      "right_shift": 7
+    },
+    "fc": {
+      "weight_exponent": -6,
+      "input_exponent": -4,
+      "bias_exponent": -10,
+      "worst_case_accumulator_bound": 1306915,
+      "weight_shape": [
+        10,
+        200
+      ],
+      "bias_shape": [
+        10
+      ],
+      "logit_exponent": -10
+    }
+  },
+  "conv_layout": "OIHW",
+  "fc_layout": "OI",
+  "accumulator": "signed INT32",
+  "activation": "UINT8",
+  "weights": "signed INT8",
+  "pool": "2x2 stride2 floor; final odd row/column discarded",
+  "padding": 0,
+  "conv_stride": 1,
+  "rounding": "add 2^(shift-1), arithmetic right shift; then clip[0,255]",
+  "board_verified": false,
+  "mac_per_cell": 61184,
+  "parameters_including_bias": 2346
+}
